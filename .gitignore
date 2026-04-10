@@ -1,0 +1,39 @@
+# 系统文件
+.DS_Store
+Thumbs.db
+*.bak
+*.bak[0-9]
+*.tmp
+*.log
+*.swp
+*~
+
+# 依赖目录
+node_modules/
+bower_components/
+
+# 环境文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 构建输出
+dist/
+build/
+out/
+.next/
+.cache/
+
+# 本地服务器
+.server.pid
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
