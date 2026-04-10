@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试 data.js 加载</title>
+    <script>
+        window.onload = function() {
+            console.log("开始测试 data.js 加载...");
+            
+            // 尝试访问全局变量
+            console.log("检查全局变量...");
+            console.log("window.ARTICLES:", typeof window.ARTICLES);
+            console.log("window.CATEGORIES:", typeof window.CATEGORIES);
+            console.log("window.TAGS:", typeof window.TAGS);
+            
+            if (typeof ARTICLES !== 'undefined') {
+                console.log("✅ ARTICLES 找到了，有", ARTICLES.length, "篇文章");
+                document.getElementById("result").innerHTML = "✅ data.js 加载成功！找到 " + ARTICLES.length + " 篇文章";
+            } else {
+                console.log("❌ ARTICLES 未定义");
+                document.getElementById("result").innerHTML = "❌ data.js 加载失败！错误：";
+                document.getElementById("error").innerHTML = "ARTICLES 变量未定义，请检查控制台";
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>测试 data.js 加载</h1>
+    <div id="result" style="padding: 20px; font-size: 18px;"></div>
+    <div id="error" style="color: red; padding: 20px;"></div>
+    <p>请按 F12 打开控制台查看详细输出。</p>
+    
+    <!-- 加载 data.js -->
+    <script src="js/data.js"></script>
+</body>
+</html>

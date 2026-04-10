@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试页面</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>测试 HTTP 服务器</h1>
+    <p id="status">检查 JavaScript 是否可用...</p>
+    <p id="console"></p>
+    <script>
+        try {
+            document.getElementById('status').innerHTML = '<span class="success">✅ 页面加载成功，JavaScript 工作正常。</span>';
+            console.log('测试脚本执行成功');
+        } catch(e) {
+            document.getElementById('status').innerHTML = '<span class="error">❌ JavaScript 错误：' + e.message + '</span>';
+        }
+    </script>
+</body>
+</html>

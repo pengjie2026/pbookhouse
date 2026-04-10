@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>蒲草书屋 — 文字与光的栖所</title>
+  <meta name="description" content="蒲草书屋，收录科技、建筑、文学、摄影、艺术等领域的精选文章，在阅读中寻找安静与深度。" />
+
+  <!-- Marked.js (Markdown 渲染) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- highlight.js 代码高亮 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css" />
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+
+  <!-- 样式 -->
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- 配置 marked -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      marked.setOptions({
+        breaks: true,
+        gfm: true,
+        highlight: function(code, lang) {
+          if (lang && hljs.getLanguage(lang)) {
+            try { return hljs.highlight(code, { language: lang }).value; } catch(e){}
+          }
+          return hljs.highlightAuto(code).value;
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+
+<!-- ====== 导航栏 ====== -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="#" onclick="goHome(); return false;">
+      <div class="logo-icon">蒲</div>
+      蒲草书屋
+    </a>
+
+    <div class="nav-links" id="nav-links">
+      <a href="#" data-page="home" onclick="goHome(); return false;">首页</a>
+      <a href="#" data-page="tags" onclick="Router.navigate('tags'); return false;">分类</a>
+      <a href="#" data-page="about" onclick="Router.navigate('about'); return false;">关于</a>
+    </div>
+
+    <button class="nav-menu-btn" onclick="toggleMobileMenu()" aria-label="菜单">
+      ☰
+    </button>
+  </div>
+</nav>
+
+<!-- ====== 首页 ====== -->
+<div id="page-home" class="page page-wrapper">
+
+  <!-- Hero 区 -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge">✦ 文字与光的栖所</div>
+      <h1>阅读，是与世界<br>保持距离的方式</h1>
+      <p>收录科技、建筑、文学、摄影、艺术等领域的深度文章，慢下来，读一些真正值得读的东西。</p>
+    </div>
+  </section>
+
+  <!-- 分类过滤器 -->
+  <div class="filter-bar">
+    <div class="filter-inner">
+      <span class="filter-label">筛选</span>
+      <div id="filter-buttons"></div>
+    </div>
+  </div>
+
+  <!-- 搜索 + 文章列表 -->
+  <section class="articles-section">
+    <div class="container">
+      <div class="articles-layout">
+        <!-- 主内容 -->
+        <div>
+          <!-- 搜索框 -->
+          <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="搜索文章标题、内容或标签…" />
+          </div>
+
+          <!-- 文章网格 -->
+          <div id="articles-grid" class="articles-grid">
+            <!-- 由 JS 动态生成 -->
+          </div>
+
+          <!-- 分页 -->
+          <div class="pagination">
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">→</button>
+          </div>
+        </div>
+
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+          <!-- 分类 widget -->
+          <div class="sidebar-widget">
+            <div class="widget-title">📂 分类</div>
+            <div id="sidebar-categories" class="category-list"></div>
+          </div>
+
+          <!-- 标签云 widget -->
+          <div class="sidebar-widget">
+            <div class="widget-title">🏷 标签云</div>
+            <div id="sidebar-tags" class="tags-cloud"></div>
+          </div>
+
+          <!-- 关于 widget -->
+          <div class="sidebar-widget">
+            <div class="widget-title">✦ 关于书屋</div>
+            <p style="font-size:13px;color:var(--color-gray-medium);line-height:1.7">蒲草书屋是一个私人阅读空间，收录那些值得反复阅读的文字——关于科技的边界、建筑的诗意、文学的沉重与摄影的瞬间。</p>
+            <button
+              onclick="Router.navigate('about')"
+              style="margin-top:12px;width:100%;padding:8px;border-radius:6px;border:1px solid var(--color-border);background:white;font-size:13px;cursor:pointer;font-family:var(--font-family);color:var(--color-gray-dark);transition:all 0.2s"
+              onmouseover="this.style.background='var(--color-accent-light)'"
+              onmouseout="this.style.background='white'"
+            >了解更多 →</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ====== 文章详情页 ====== -->
+<div id="page-article" class="page hidden">
+  <div class="article-page container">
+    <!-- 主内容 -->
+    <main class="article-main" id="article-content">
+      <!-- 由 JS 动态生成 -->
+    </main>
+
+    <!-- 目录侧边栏 -->
+    <aside>
+      <div id="article-toc"></div>
+
+      <!-- 返回按钮 widget -->
+      <div class="sidebar-widget" style="margin-top:16px">
+        <button
+          onclick="goHome()"
+          style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--color-border);background:white;font-size:13px;cursor:pointer;font-family:var(--font-family);color:var(--color-gray-dark);display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s"
+          onmouseover="this.style.background='var(--color-gray-bg)'"
+          onmouseout="this.style.background='white'"
+        >← 返回首页</button>
+
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--color-border)">
+          <div class="widget-title" style="font-size:12px">✦ 发现更多</div>
+          <div class="tags-cloud" id="article-page-tags">
+            <!-- 标签由JS填充 -->
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 相关文章 -->
+  <div id="related-articles"></div>
+</div>
+
+<!-- ====== 标签分类页 ====== -->
+<div id="page-tags" class="page hidden">
+  <div class="tags-page">
+    <div class="page-header">
+      <h1>✦ 分类与标签</h1>
+      <p>按主题浏览所有文章，找到你感兴趣的内容</p>
+    </div>
+
+    <!-- 分类/标签网格 -->
+    <div id="tags-grid"></div>
+
+    <!-- 筛选后的文章 -->
+    <div id="tag-articles"></div>
+  </div>
+</div>
+
+<!-- ====== 关于页面 ====== -->
+<div id="page-about" class="page hidden">
+  <div class="about-page">
+    <!-- 主内容 -->
+    <main class="about-main">
+      <div class="about-profile">
+        <div class="about-avatar">🌿</div>
+        <div class="about-profile-info">
+          <h1>蒲草书屋</h1>
+          <p>一个关于深度阅读与思考的私人空间 · 始于 2024</p>
+        </div>
+      </div>
+
+      <div class="about-stats">
+        <div class="stat-item">
+          <span class="stat-number">12</span>
+          <span class="stat-label">篇文章</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">5</span>
+          <span class="stat-label">个分类</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">12</span>
+          <span class="stat-label">个标签</span>
+        </div>
+      </div>
+
+      <div class="about-content">
+        <h2>书屋的由来</h2>
+        <p>
+          "蒲草"，生长于水边，质地柔韧，古人用以编织——它不华丽，但实用，有一种低调的生命力。这个名字，是对这个空间期望的隐喻：不追求华美，只求有用、有深度、经得起时间。
+        </p>
+        <p>
+          这里收录的文章，来自我多年阅读积累中真正触动过我的那些——关于技术与人文的交界、建筑空间与时间的对话、文学叙事与存在感受的共鸣、摄影瞬间与视觉哲学、艺术创作与思维边界。
+        </p>
+
+        <h2>关注的领域</h2>
+        <ul>
+          <li>科技哲学——人工智能、量子物理与人文的深层对话</li>
+          <li>建筑与空间——现代建筑、古典废墟与居住美学</li>
+          <li>文学批评——中外文学的文本细读与思想溯源</li>
+          <li>摄影与视觉——街头摄影、纪实影像与观看方式</li>
+          <li>艺术史论——从经典绘画到生成艺术的美学演变</li>
+        </ul>
+
+        <h2>阅读观</h2>
+        <p>
+          在信息爆炸的时代，"快速消费内容"已经成为主流。但有些思考需要时间，有些文字需要反复咀嚼才能体会其中的分量。
+        </p>
+        <p>
+          蒲草书屋的选文标准只有一个：<strong>是否值得慢下来读</strong>。没有流量焦虑，没有热点追逐，只有那些在喧嚣中保持安静的文字。
+        </p>
+
+        <h2>联系</h2>
+        <p>
+          如果你有好文章想推荐，或者有任何想法与我交流，欢迎随时发邮件。独自阅读是修行，但偶尔的对话会让思想走得更远。
+        </p>
+      </div>
+    </main>
+
+    <!-- 侧边栏 -->
+    <aside class="about-sidebar">
+      <div class="sidebar-widget">
+        <div class="widget-title">🌿 兴趣领域</div>
+        <div class="interest-list">
+          <div class="interest-item">
+            <span class="icon">⚡</span>
+            <span>科技与人文</span>
+          </div>
+          <div class="interest-item">
+            <span class="icon">🏛</span>
+            <span>建筑与空间</span>
+          </div>
+          <div class="interest-item">
+            <span class="icon">📖</span>
+            <span>文学与叙事</span>
+          </div>
+          <div class="interest-item">
+            <span class="icon">📷</span>
+            <span>摄影与视觉</span>
+          </div>
+          <div class="interest-item">
+            <span class="icon">🎨</span>
+            <span>艺术与美学</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-widget" style="margin-top:16px">
+        <div class="widget-title">📚 近期关注</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:13px;color:var(--color-gray-medium);line-height:1.6;padding:8px;background:white;border-radius:6px">
+            大语言模型时代的创作伦理
+          </div>
+          <div style="font-size:13px;color:var(--color-gray-medium);line-height:1.6;padding:8px;background:white;border-radius:6px">
+            后工业城市的空间记忆
+          </div>
+          <div style="font-size:13px;color:var(--color-gray-medium);line-height:1.6;padding:8px;background:white;border-radius:6px">
+            汉字字体设计的现代性
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-widget" style="margin-top:16px">
+        <div class="widget-title">✦ 座右铭</div>
+        <blockquote style="font-size:13px;color:var(--color-gray-medium);line-height:1.8;font-style:italic;margin:0;padding:12px;border-left:3px solid var(--color-accent);background:var(--color-accent-light);border-radius:0 6px 6px 0">
+          "阅读是向死而生的演练——每一本书都是另一个人的一生，你在里面借居片刻，然后带着它的痕迹离开。"
+        </blockquote>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ====== Footer ====== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div style="width:24px;height:24px;background:var(--color-accent);border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600">蒲</div>
+      蒲草书屋
+    </div>
+    <p class="footer-copy">© 2026 蒲草书屋 · 文字与光的栖所</p>
+    <div class="footer-links">
+      <a href="#" onclick="Router.navigate('about'); return false;">关于</a>
+      <a href="#" onclick="Router.navigate('tags'); return false;">分类</a>
+    </div>
+  </div>
+</footer>
+
+<!-- 返回顶部按钮 -->
+<button class="back-to-top" id="back-to-top" title="返回顶部">↑</button>
+
+<!-- 脚本 -->
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
