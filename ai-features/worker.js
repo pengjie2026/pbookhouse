@@ -57,7 +57,7 @@ export default {
  * 语音合成 - Text-to-Speech
  */
 async function handleTTS(request, env, headers) {
-  const { text, voice_id = 'male-qn-qingse', speed = 1.0 } = await request.json();
+  const { text, voice_id = 'female-tianmei', speed = 1.0 } = await request.json();
 
   if (!text) {
     return new Response(JSON.stringify({ error: 'text is required' }), {
@@ -66,14 +66,14 @@ async function handleTTS(request, env, headers) {
     });
   }
 
-  const response = await fetch('https://api.minimax.chat/v1/t2a_v2', {
+  const response = await fetch('https://api.minimaxi.com/v1/t2a_v2', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${env.MINIMAX_API_KEY}`,
     },
     body: JSON.stringify({
-      model: 'speech-2.8-HD',
+      model: 'speech-2.6-hd',
       text: text,
       stream: false,
       voice_setting: {
@@ -81,7 +81,6 @@ async function handleTTS(request, env, headers) {
         speed: speed,
         vol: 1.0,
         pitch: 0,
-        emotion: 'calm',
       },
       audio_setting: {
         sample_rate: 32000,
@@ -104,7 +103,7 @@ async function handleTTS(request, env, headers) {
   return new Response(audioBuffer, {
     headers: {
       ...headers,
-      'Content-Type': 'audio/mp3',
+      'Content-Type': 'audio/mpeg',
       'Content-Disposition': 'inline',
     },
   });
@@ -123,7 +122,7 @@ async function handleImageGen(request, env, headers) {
     });
   }
 
-  const response = await fetch('https://api.minimax.chat/v1/image_generation', {
+  const response = await fetch('https://api.minimaxi.com/v1/image_generation', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -132,8 +131,8 @@ async function handleImageGen(request, env, headers) {
     body: JSON.stringify({
       model: model,
       prompt: prompt,
-      image_size: '1:1',
-      style: style, // natural | anime | flat_illustration
+      aspect_ratio: '1:1',
+      response_format: 'base64',
     }),
   });
 
@@ -147,10 +146,10 @@ async function handleImageGen(request, env, headers) {
 
   const data = await response.json();
   
-  // 返回生成的图片 URL
+  // 返回生成的图片 Base64
   return new Response(JSON.stringify({
     created: Date.now(),
-    data: data.data || [],
+    data: data.data?.image_base64 || [],
   }), {
     headers: { ...headers, 'Content-Type': 'application/json' },
   });
