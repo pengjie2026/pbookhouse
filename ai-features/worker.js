@@ -385,17 +385,6 @@ async function handleTextGen(request, env, headers) {
   });
 }
 
-  // 返回完整响应供调试
-  return new Response(JSON.stringify({
-    debug: true,
-    responseKeys: Object.keys(data),
-    dataKeys: data.data ? Object.keys(data.data) : [],
-    fullResponse: data
-  }), {
-    headers: { ...headers, 'Content-Type': 'application/json' },
-  });
-}
-
 /**
  * 调试接口 - TTS 原始响应
  */
