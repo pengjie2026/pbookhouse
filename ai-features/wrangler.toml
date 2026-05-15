@@ -1,0 +1,9 @@
+name = "pugrass-ai"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+# 可选的默认变量
+
+# Secrets (运行时设置，不要在这里明文写)
+# 使用: wrangler secret put MINIMAX_API_KEY
