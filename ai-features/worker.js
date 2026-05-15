@@ -325,7 +325,8 @@ async function handleImageGen(request, env, headers) {
  * 文本生成 - AI 写作优化
  */
 async function handleTextGen(request, env, headers) {
-  const { prompt, model = 'abab6.5s-chat' } = await request.json();
+  // Token Plan 支持的模型: MiniMax-M2.7, MiniMax-M2.5
+  const { prompt, model = 'MiniMax-M2.7' } = await request.json();
 
   if (!prompt) {
     return new Response(JSON.stringify({ error: 'prompt is required' }), {
