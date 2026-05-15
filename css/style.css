@@ -343,6 +343,10 @@ ul, ol {
   display: none; /* 隐藏图标占位区域 */
 }
 
+.article-cover {
+  display: none; /* 隐藏文章详情页封面图 */
+}
+
 .card-content {
   padding: var(--spacing-lg);
   display: flex;
