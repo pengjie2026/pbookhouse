@@ -286,6 +286,29 @@ function renderArticle(id) {
         ${tagsHTML}
       </div>
     </footer>
+
+    <!-- AI 助手区域 -->
+    <div class="ai-assistant-section">
+      <div class="ai-assistant-header">
+        <span class="ai-icon">🤖</span>
+        <span>AI 助手</span>
+      </div>
+
+      <div class="ai-buttons">
+        <button id="ai-summary-btn" class="ai-btn" onclick="generateAISummary()">
+          📝 AI 总结
+        </button>
+        <button id="ai-map-btn" class="ai-btn" onclick="generateKnowledgeMap()">
+          🗺️ 知识脉络图
+        </button>
+      </div>
+
+      <!-- AI 总结结果 -->
+      <div id="ai-summary-result" class="ai-result hidden"></div>
+
+      <!-- 知识脉络图结果 -->
+      <div id="ai-map-result" class="ai-result hidden"></div>
+    </div>
   `;
 
   // 代码高亮
@@ -522,6 +545,184 @@ function setupBackToTop() {
   btn.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
+}
+
+// ===== AI 助手功能 =====
+const AI_API_BASE = 'https://pugrass-ai.laopeng.workers.dev';
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function getSpinnerHTML() {
+  return '<div class="loading" style="display:inline-flex;align-items:center;gap:8px"><div class="spinner" style="width:16px;height:16px;border:2px solid var(--color-border);border-top-color:var(--color-accent);border-radius:50%;animation:spin 0.8s linear infinite"></div><span>处理中...</span></div>';
+}
+
+// AI 总结功能
+async function generateAISummary() {
+  const btn = document.getElementById('ai-summary-btn');
+  const resultEl = document.getElementById('ai-summary-result');
+  const article = ARTICLES.find(a => a.id === AppState.currentArticleId);
+
+  if (!article) {
+    alert('无法获取文章内容');
+    return;
+  }
+
+  // 如果已有结果，切换显示/隐藏
+  if (resultEl.dataset.generated === 'true' && !resultEl.classList.contains('hidden')) {
+    resultEl.classList.add('hidden');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = getSpinnerHTML();
+  resultEl.classList.remove('hidden');
+  resultEl.innerHTML = '<div class="loading" style="padding:20px;text-align:center">' + getSpinnerHTML() + '</div>';
+
+  try {
+    // 构建总结提示词
+    const prompt = `请为以下文章生成简洁的核心要点总结，用列表形式呈现（3-5个要点），每个要点一句话。
+
+文章标题：${article.title}
+文章分类：${article.categoryName}
+文章内容：
+${article.content.slice(0, 2000)}${article.content.length > 2000 ? '...' : ''}
+
+请直接输出要点列表，不需要其他说明。`;
+
+    const res = await fetch(`${AI_API_BASE}/text`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, model: 'MiniMax-M2.7' })
+    });
+
+    if (!res.ok) {
+      throw new Error('生成失败');
+    }
+
+    const data = await res.json();
+
+    if (data.text) {
+      resultEl.innerHTML = `
+        <div class="ai-result-header">
+          <span>📝 核心要点</span>
+          <button class="ai-btn-close" onclick="document.getElementById('ai-summary-result').classList.add('hidden')">×</button>
+        </div>
+        <div class="ai-result-content">${escapeHtml(data.text)}</div>
+      `;
+      resultEl.dataset.generated = 'true';
+    } else {
+      throw new Error('未获取到结果');
+    }
+  } catch (error) {
+    resultEl.innerHTML = `
+      <div class="ai-result-error">
+        <span>❌ 总结生成失败</span>
+        <p style="margin:8px 0 0;font-size:13px;color:var(--color-gray-medium)">${error.message}</p>
+      </div>
+    `;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '📝 AI 总结';
+  }
+}
+
+// 知识脉络图功能
+async function generateKnowledgeMap() {
+  const btn = document.getElementById('ai-map-btn');
+  const resultEl = document.getElementById('ai-map-result');
+  const article = ARTICLES.find(a => a.id === AppState.currentArticleId);
+
+  if (!article) {
+    alert('无法获取文章内容');
+    return;
+  }
+
+  // 如果已有结果，切换显示/隐藏
+  if (resultEl.dataset.generated === 'true' && !resultEl.classList.contains('hidden')) {
+    resultEl.classList.add('hidden');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = getSpinnerHTML();
+  resultEl.classList.remove('hidden');
+  resultEl.innerHTML = '<div class="loading" style="padding:40px;text-align:center">' + getSpinnerHTML() + '<p style="margin-top:12px;font-size:13px;color:var(--color-gray)">正在生成知识脉络图，请稍候...</p></div>';
+
+  try {
+    // 构建图片生成提示词
+    const prompt = `Create a knowledge mind map diagram for an article about "${article.title}" (Category: ${article.categoryName}).
+
+The map should show the key concepts and their relationships in a hierarchical, clean, professional style similar to a textbook diagram or academic mind map.
+
+Style requirements:
+- Clean, minimalist design with white or light background
+- Use Chinese text for labels
+- Hierarchical tree or radial layout
+- Clear visual hierarchy with main topic in center
+- Branch nodes showing sub-concepts
+- Professional illustration style, like a high-quality educational diagram
+- Colors should be harmonious (soft blues, greens, or warm earth tones)
+- No photorealistic elements, prefer clean vector/illustration style`;
+
+    const res = await fetch(`${AI_API_BASE}/image`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, style: 'natural' })
+    });
+
+    if (!res.ok) {
+      throw new Error('生成失败');
+    }
+
+    const data = await res.json();
+
+    let imageData = data.data?.[0] || data[0];
+    if (typeof imageData === 'string') {
+      imageData = imageData;
+    } else {
+      imageData = imageData?.b64_json || imageData?.url;
+    }
+
+    if (imageData) {
+      const isBase64 = imageData.length > 100 && !imageData.startsWith('http');
+      const imgSrc = isBase64 ? `data:image/png;base64,${imageData}` : imageData;
+
+      resultEl.innerHTML = `
+        <div class="ai-result-header">
+          <span>🗺️ 知识脉络图</span>
+          <button class="ai-btn-close" onclick="document.getElementById('ai-map-result').classList.add('hidden')">×</button>
+        </div>
+        <div class="ai-result-content" style="text-align:center">
+          <img src="${imgSrc}" alt="知识脉络图" style="max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1)" />
+          ${isBase64 ? `<button class="ai-btn-download" onclick="downloadAIMap('${imageData}')" style="margin-top:12px">💾 下载图片</button>` : ''}
+        </div>
+      `;
+      resultEl.dataset.generated = 'true';
+    } else {
+      throw new Error('未获取到图片数据');
+    }
+  } catch (error) {
+    resultEl.innerHTML = `
+      <div class="ai-result-error">
+        <span>❌ 知识脉络图生成失败</span>
+        <p style="margin:8px 0 0;font-size:13px;color:var(--color-gray-medium)">${error.message}</p>
+      </div>
+    `;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🗺️ 知识脉络图';
+  }
+}
+
+function downloadAIMap(b64) {
+  const link = document.createElement('a');
+  link.href = `data:image/png;base64,${b64}`;
+  link.download = `知识脉络图_${Date.now()}.png`;
+  link.click();
 }
 
 // ---- 初始化 ----
