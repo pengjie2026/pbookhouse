@@ -9,7 +9,7 @@
  * 3. 部署: wrangler deploy
  */
 
-const VERSION = '1.0.2';
+const VERSION = '1.0.3';
 
 export default {
   async fetch(request, env, ctx) {
