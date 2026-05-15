@@ -248,11 +248,11 @@
     <div class="btn-row">
       <label style="margin: 0;">音色:</label>
       <select id="voice-select">
-        <option value="female-tianmei">女声-甜美</option>
-        <option value="female-tianmei-2">女声-甜美2</option>
-        <option value="female-shaonv">女声-少女</option>
-        <option value="male-tiancai">男声-天才</option>
-        <option value="male-baishi">男声-白石</option>
+        <option value="Chinese (Mandarin)_Lyrical_Voice">中文-抒情语音</option>
+        <option value="Chinese (Mandarin)_HK_Flight_Attendant">中文-香港空乘</option>
+        <option value="Cantonese_GentleLady">粤语-温柔女士</option>
+        <option value="English_Graceful_Lady">英文-优雅女士</option>
+        <option value="English_Insightful_Speaker">英文-睿智演讲者</option>
       </select>
     </div>
     
@@ -494,6 +494,12 @@
       link.href = `data:image/png;base64,${b64}`;
       link.download = `蒲草书屋配图_${Date.now()}.png`;
       link.click();
+    }
+    
+    function downloadImageFromData(data) {
+      if (data && data.length > 0) {
+        downloadImage(data[0]);
+      }
     }
     
     function showPromptIdeas() {

@@ -57,7 +57,7 @@ export default {
  * 语音合成 - Text-to-Speech
  */
 async function handleTTS(request, env, headers) {
-  const { text, voice_id = 'female-tianmei', speed = 1.0 } = await request.json();
+  const { text, voice_id = 'Chinese (Mandarin)_Lyrical_Voice', speed = 1.0 } = await request.json();
 
   if (!text) {
     return new Response(JSON.stringify({ error: 'text is required' }), {
@@ -98,14 +98,23 @@ async function handleTTS(request, env, headers) {
     });
   }
 
-  // 返回音频数据
-  const audioBuffer = await response.arrayBuffer();
-  return new Response(audioBuffer, {
-    headers: {
-      ...headers,
-      'Content-Type': 'audio/mpeg',
-      'Content-Disposition': 'inline',
-    },
+  const data = await response.json();
+  
+  // MiniMax 返回的是 hex 编码的音频数据
+  if (data.data?.audio) {
+    const audioBuffer = Buffer.from(data.data.audio, 'hex');
+    return new Response(audioBuffer, {
+      headers: {
+        ...headers,
+        'Content-Type': 'audio/mpeg',
+        'Content-Disposition': 'inline',
+      },
+    });
+  }
+  
+  // 如果没有 audio 字段，返回完整响应供调试
+  return new Response(JSON.stringify(data), {
+    headers: { ...headers, 'Content-Type': 'application/json' },
   });
 }
 
@@ -113,7 +122,7 @@ async function handleTTS(request, env, headers) {
  * 图片生成 - Text-to-Image
  */
 async function handleImageGen(request, env, headers) {
-  const { prompt, model = 'image-01', style = 'natural' } = await request.json();
+  const { prompt, model = 'image-01' } = await request.json();
 
   if (!prompt) {
     return new Response(JSON.stringify({ error: 'prompt is required' }), {
@@ -146,11 +155,20 @@ async function handleImageGen(request, env, headers) {
 
   const data = await response.json();
   
-  // 返回生成的图片 Base64
-  return new Response(JSON.stringify({
-    created: Date.now(),
-    data: data.data?.image_base64 || [],
-  }), {
+  // MiniMax 返回格式: { data: { image_base64: ["base64字符串", ...] } }
+  const imageBase64 = data.data?.image_base64;
+  
+  if (imageBase64 && imageBase64.length > 0) {
+    return new Response(JSON.stringify({
+      created: Date.now(),
+      data: imageBase64,
+    }), {
+      headers: { ...headers, 'Content-Type': 'application/json' },
+    });
+  }
+  
+  // 如果没有图片数据，返回完整响应供调试
+  return new Response(JSON.stringify(data), {
     headers: { ...headers, 'Content-Type': 'application/json' },
   });
 }
