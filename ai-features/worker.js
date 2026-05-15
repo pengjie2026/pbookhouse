@@ -357,30 +357,33 @@ async function handleTextGen(request, env, headers) {
   const data = await response.json();
   console.log('Text Response:', JSON.stringify(data));
 
-  // 提取回复内容
-  const choices = data.choices || data.data?.choices;
+  // 提取回复内容 - M2.7 使用 OpenAI兼容格式
+  // 优先级: choices > text (M2.7 的 text 字段可能为空)
+  let text = '';
+  
+  // 方式1: choices[].messages[].content (标准 OpenAI 格式)
+  const choices = data.choices;
   if (choices && choices.length > 0) {
-    const content = choices[0]?.messages?.[0]?.content || choices[0]?.content || '';
-    return new Response(JSON.stringify({
-      text: content,
-      model: data.model || model,
-      usage: data.usage || data.data?.usage,
-    }), {
-      headers: { ...headers, 'Content-Type': 'application/json' },
-    });
+    const choice = choices[0];
+    text = choice?.messages?.[0]?.content || 
+           choice?.message?.content ||
+           choice?.text || '';
   }
-
-  // 如果是流式响应或其他格式，尝试其他提取方式
-  const text = data.text || data.response || data.data?.text || data.data?.response;
-  if (text) {
-    return new Response(JSON.stringify({
-      text: text,
-      model: data.model || model,
-      usage: data.usage,
-    }), {
-      headers: { ...headers, 'Content-Type': 'application/json' },
-    });
+  
+  // 方式2: 如果 choices 为空，尝试直接字段
+  if (!text) {
+    text = data.text || data.response || data.output || '';
   }
+  
+  return new Response(JSON.stringify({
+    text: text,
+    model: data.model || model,
+    usage: data.usage,
+    debug: !text ? { responseKeys: Object.keys(data), choices: data.choices } : undefined
+  }), {
+    headers: { ...headers, 'Content-Type': 'application/json' },
+  });
+}
 
   // 返回完整响应供调试
   return new Response(JSON.stringify({
